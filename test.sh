@@ -1,7 +1,7 @@
 #!/bin/sh
 # os-vm-state.sh, ABr, 20141029
 # List of all VMs and their state
-
+#source admin-openrc.sh
 # get list of all vms
 l_all_vms=$(nova list --all-tenants | tail -n +4 | head -n -1 | cut -d'|' -f 2 | sed -e 's# ##g')
 
@@ -20,7 +20,13 @@ for vm in $l_all_vms; do
       l_vm_tenant=$(keystone tenant-get $l_vm_tenant_id | grep -e '  name  ' | cut -d'|' -f 3 | sed -e 's#^ \+##; s#[ \t]*$##')
       # print output
       echo "$vm|$l_vm_host|$l_vm_tenant|$l_vm_name|$l_vm_state"
-    #fi
+	active="active";
+	if [ $l_vm_state == $active ]; then
+	nova live-migration $vm compute1
+#		echo "$active"
+	#nova live-migration $vm compute2
+	fi
+    fi
   fi
 done
 rm -f $l_tmp
